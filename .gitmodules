@@ -2,3 +2,7 @@
 	path = external/anthropics-skills
 	url = https://github.com/anthropics/skills
 	branch = main
+[submodule "external/mattpocock-skills"]
+	path = external/mattpocock-skills
+	url = https://github.com/mattpocock/skills
+	branch = main

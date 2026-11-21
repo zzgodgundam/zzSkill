@@ -99,3 +99,4 @@ scripts/install.sh <其他目錄>          # 例如專案內的 .claude/skills
 | 名稱 | 來源 | 說明 |
 |------|------|------|
 | anthropics-skills | [anthropics/skills](https://github.com/anthropics/skills) | Anthropic 官方 skill 範例集（docx、pdf、pptx、xlsx、skill-creator 等） |
+| mattpocock-skills | [mattpocock/skills](https://github.com/mattpocock/skills) | Matt Pocock 的工程與生產力 skill（tdd、diagnosing-bugs、to-spec、grill-me、handoff 等） |
