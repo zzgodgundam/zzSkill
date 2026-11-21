@@ -53,7 +53,23 @@ scripts/add-external.sh https://github.com/anthropics/skills anthropics-skills
 git commit -m "Add external skill: anthropics-skills"
 ```
 
-未指定分支時會自動偵測遠端預設分支，並寫入 `.gitmodules` 的 `branch` 欄位，讓之後的更新會追蹤該分支。
+### 追蹤方式
+
+| 方式 | 指令 | 更新時的行為 |
+|------|------|------|
+| 追蹤分支 | `scripts/add-external.sh <url> [名稱] [分支]` | 更新到分支最新 commit（未指定分支時自動偵測遠端預設分支） |
+| 追蹤最新 release tag | `scripts/add-external.sh --tag <url> [名稱]` | 更新到最新正式版 tag（依版本號排序，略過含 `-` 的預發布版如 `v2.0.0-rc1`） |
+
+設定記錄在 `.gitmodules`：分支追蹤使用 `branch = main`；tag 追蹤使用自訂欄位 `track = tag`。
+要切換既有 submodule 為 tag 追蹤：
+
+```bash
+git config -f .gitmodules --unset submodule.external/<名稱>.branch
+git config -f .gitmodules submodule.external/<名稱>.track tag
+scripts/update-external.sh
+```
+
+> Git 原生的 `git submodule update --remote` 只支援分支，因此 tag 追蹤必須透過 `scripts/update-external.sh` 更新。
 
 ## 更新他人的 skill 到最新
 
@@ -62,8 +78,6 @@ scripts/update-external.sh            # 更新並顯示變更
 scripts/update-external.sh --commit   # 更新並自動 commit
 git push
 ```
-
-等同於 `git submodule update --init --remote --recursive`。
 
 另外 GitHub Actions（`.github/workflows/update-external-skills.yml`）會在**每週一**自動更新並 commit，也可以在 GitHub 的 Actions 頁面手動執行（workflow_dispatch）。
 
@@ -98,5 +112,5 @@ scripts/install.sh <其他目錄>          # 例如專案內的 .claude/skills
 
 | 名稱 | 來源 | 說明 |
 |------|------|------|
-| anthropics-skills | [anthropics/skills](https://github.com/anthropics/skills) | Anthropic 官方 skill 範例集（docx、pdf、pptx、xlsx、skill-creator 等） |
-| mattpocock-skills | [mattpocock/skills](https://github.com/mattpocock/skills) | Matt Pocock 的工程與生產力 skill（tdd、diagnosing-bugs、to-spec、grill-me、handoff 等） |
+| anthropics-skills | [anthropics/skills](https://github.com/anthropics/skills)（追蹤 `main`，此 repo 無 tag） | Anthropic 官方 skill 範例集（docx、pdf、pptx、xlsx、skill-creator 等） |
+| mattpocock-skills | [mattpocock/skills](https://github.com/mattpocock/skills)（追蹤最新 release tag） | Matt Pocock 的工程與生產力 skill（tdd、diagnosing-bugs、to-spec、grill-me、handoff 等） |
