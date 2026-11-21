@@ -6,6 +6,7 @@ cd "$(git rev-parse --show-toplevel)"
 
 git submodule sync --recursive
 git submodule update --init --remote --recursive
+scripts/sync-project-skills.sh
 
 if git diff --quiet -- external; then
   echo "所有外部 skill 都已是最新版本。"

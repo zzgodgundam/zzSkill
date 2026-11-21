@@ -74,7 +74,18 @@ scripts/remove-external.sh <名稱>
 git commit -m "Remove external skill: <名稱>"
 ```
 
-## 安裝到 Claude Code
+## 在 Claude Code 中使用
+
+### 方式一：在本 repo 中開啟 Claude Code（本機或 claude.ai/code 雲端）
+
+`.claude/skills/` 內有指向所有 skill 的 symlink，Claude Code 開啟本 repo 時會自動載入。
+`.claude/settings.json` 的 SessionStart hook 會自動執行 `git submodule update --init`，確保外部 skill 內容存在。
+
+> Skill 在 session 啟動時載入，新增 skill 後需開新的 session 才會生效。
+
+新增/移除 skill 後執行 `scripts/sync-project-skills.sh` 更新 symlink（`add-external.sh`、`remove-external.sh`、`update-external.sh` 已會自動執行）。
+
+### 方式二：安裝到全域，在任何專案都能使用
 
 ```bash
 scripts/install.sh                    # 預設安裝到 ~/.claude/skills

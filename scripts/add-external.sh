@@ -16,5 +16,6 @@ else
 fi
 
 git submodule add -b "$branch" "$url" "external/$name"
+scripts/sync-project-skills.sh
 echo "已新增 external/$name (追蹤分支: $branch)"
 echo "請記得 commit: git commit -m \"Add external skill: $name\""

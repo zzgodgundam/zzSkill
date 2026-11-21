@@ -8,5 +8,6 @@ path="external/$name"
 
 git submodule deinit -f "$path"
 git rm -f "$path"
+scripts/sync-project-skills.sh
 rm -rf ".git/modules/$path"
 echo "已移除 $path，請記得 commit。"
