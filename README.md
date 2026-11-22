@@ -111,7 +111,9 @@ scripts/update-external.sh --commit   # 更新並自動 commit
 git push
 ```
 
-另外 GitHub Actions（`.github/workflows/update-external-skills.yml`）會在**每週一**自動更新並 commit，也可以在 GitHub 的 Actions 頁面手動執行（workflow_dispatch）。
+另外 GitHub Actions（`.github/workflows/update-external-skills.yml`）會在**每週一**自動更新：推到 `auto/update-external-skills` 分支 → 開 PR → 自動合併到 `main`（相容 `main` 的分支保護）。也可以在 GitHub 的 Actions 頁面手動執行（workflow_dispatch）。
+
+> 需在 repo 的 **Settings → Actions → General → Workflow permissions** 勾選 **Allow GitHub Actions to create and approve pull requests**，workflow 才能開 PR。
 
 ## 移除他人的 skill
 
