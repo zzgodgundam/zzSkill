@@ -48,6 +48,17 @@ jobs:
           scripts\install.ps1 $t
           if (-not (Test-Path (Join-Path $t 'tdd\SKILL.md'))) { throw "install failed" }
           if (-not (Test-Path (Join-Path $t 'my-example-skill\SKILL.md'))) { throw "install failed" }
+          # stale-link cleanup: links into this repo that are no longer skills are removed,
+          # links to other places and real directories are kept
+          $other = Join-Path $env:RUNNER_TEMP 'other'; New-Item -ItemType Directory -Force $other | Out-Null
+          New-Item -ItemType Junction -Path (Join-Path $t 'not-a-skill') -Target (Resolve-Path scripts).Path | Out-Null
+          New-Item -ItemType Junction -Path (Join-Path $t 'someone-else') -Target $other | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $t 'real-dir') | Out-Null
+          scripts\install.ps1 $t
+          if (Test-Path (Join-Path $t 'not-a-skill')) { throw "stale link not removed" }
+          if (-not (Test-Path (Join-Path $t 'someone-else'))) { throw "foreign link was removed" }
+          if (-not (Test-Path (Join-Path $t 'real-dir'))) { throw "real dir was removed" }
+          if (-not (Test-Path (Join-Path $t 'tdd\SKILL.md'))) { throw "skill missing after cleanup" }
 
       - name: remove-external.ps1 / add-external.ps1 -Tag
         run: |
