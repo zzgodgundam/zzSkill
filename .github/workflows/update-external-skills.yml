@@ -7,17 +7,39 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    env:
+      BRANCH: auto/update-external-skills
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Update submodules to latest
+
+      # main 受保護無法直接 push，因此改為：推到暫存分支 → 開 PR → 合併
+      - name: Update submodules and open PR
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
           scripts/update-external.sh --commit
-          git push
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
+            echo "No updates."
+            exit 0
+          fi
+          git push --force origin "$BRANCH"
+          {
+            echo "自動更新外部 skill 到最新版本。"
+            echo
+            echo '```'
+            git submodule summary origin/main -- external
+            echo '```'
+          } > pr-body.md
+          gh pr view "$BRANCH" --json state -q .state 2>/dev/null | grep -q OPEN \
+            || gh pr create --base main --head "$BRANCH" \
+                 --title "chore: update external skills to latest" --body-file pr-body.md
+          gh pr merge "$BRANCH" --merge --delete-branch
