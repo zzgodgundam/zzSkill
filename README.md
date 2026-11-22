@@ -55,6 +55,16 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 > `.gitattributes` 已設定 `.sh` 固定使用 LF 換行，避免在 Windows clone 後於 Git Bash / WSL 無法執行。
 
+## 分支保護
+
+`main` 受 GitHub ruleset 保護：
+
+- 禁止刪除、禁止 force push
+- 需透過 PR 合併（approvals 0）
+- 僅 repository admin（擁有者）可略過以上規則直接 push
+
+每週自動更新的 workflow 會以 PR 方式合併，不受影響。
+
 ## Clone
 
 因為包含 submodule，clone 時請加上 `--recurse-submodules`：
