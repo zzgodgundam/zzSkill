@@ -23,6 +23,22 @@ zzSkill/
     └── update-external-skills.yml  # 每週自動更新 submodule
 ```
 
+### 方式三：在所有雲端 Claude Code session 使用（claude.ai/code）
+
+在雲端環境的 **Setup script** 加入以下內容（session 標題列的環境選單 → Edit → Setup script）。
+每次建立新的雲端 container 時，會自動下載本 repo 並安裝到 `~/.claude/skills`，不論在哪個 repo 開 session 都能使用：
+
+```bash
+# 安裝 zzSkill（個人 AI skill set）到 ~/.claude/skills，讓所有 session 都能使用
+Z="$HOME/zzSkill"
+if [ -d "$Z/.git" ]; then git -C "$Z" pull -q --ff-only || true
+else git clone -q --depth 1 https://github.com/zzgodgundam/zzSkill.git "$Z" || true; fi
+if [ -d "$Z/.git" ]; then (cd "$Z" && scripts/install.sh "$HOME/.claude/skills" | tail -1) || echo "zzSkill install failed (ignored)"; fi
+```
+
+- 下載失敗不會讓 session 無法啟動（錯誤會被忽略）
+- 本 repo 須維持 public；若改為 private，setup script 無法 clone
+
 ## Windows 使用說明
 
 所有腳本都有 PowerShell 版本（`.ps1`），參數與 `.sh` 版相同，支援 Windows PowerShell 5.1 與 PowerShell 7：
