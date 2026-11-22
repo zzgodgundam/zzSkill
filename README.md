@@ -14,7 +14,7 @@ zzSkill/
 │       └── SKILL.md
 ├── external/               # 他人的 skill（git submodule）
 │   └── anthropics-skills/  # → https://github.com/anthropics/skills
-├── scripts/
+├── scripts/                # 每個腳本都有 .sh（Linux/macOS）與 .ps1（Windows）版本
 │   ├── add-external.sh     # 新增外部 skill submodule
 │   ├── update-external.sh  # 更新所有外部 skill 到最新
 │   ├── remove-external.sh  # 移除外部 skill submodule
@@ -22,6 +22,38 @@ zzSkill/
 └── .github/workflows/
     └── update-external-skills.yml  # 每週自動更新 submodule
 ```
+
+## Windows 使用說明
+
+所有腳本都有 PowerShell 版本（`.ps1`），參數與 `.sh` 版相同，支援 Windows PowerShell 5.1 與 PowerShell 7：
+
+| Linux / macOS | Windows |
+|---|---|
+| `scripts/add-external.sh <url> [名稱] [分支]` | `scripts\add-external.ps1 <url> [名稱] [分支]` |
+| `scripts/add-external.sh --tag <url> [名稱]` | `scripts\add-external.ps1 -Tag <url> [名稱]` |
+| `scripts/update-external.sh --commit` | `scripts\update-external.ps1 -Commit` |
+| `scripts/remove-external.sh <名稱>` | `scripts\remove-external.ps1 <名稱>` |
+| `scripts/install.sh [目錄]` | `scripts\install.ps1 [目錄]` |
+| `scripts/sync-project-skills.sh` | `scripts\sync-project-skills.ps1` |
+
+若出現「無法載入，因為這個系統上已停用指令碼執行」，先執行一次：
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+**建議設定（讓 `.claude/skills` 的 symlink 正常運作）：**
+
+1. 開啟 Windows「開發人員模式」（設定 → 系統 → 開發人員專用）
+2. Clone 時啟用 symlink：
+
+   ```powershell
+   git clone -c core.symlinks=true --recurse-submodules https://github.com/zzgodgundam/zzSkill.git
+   ```
+
+未開啟時腳本仍可運作：本機會改用 junction（不需權限），並直接更新 git index，commit 出去的仍是跨平台正確的 symlink。
+
+> `.gitattributes` 已設定 `.sh` 固定使用 LF 換行，避免在 Windows clone 後於 Git Bash / WSL 無法執行。
 
 ## Clone
 

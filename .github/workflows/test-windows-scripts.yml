@@ -1,0 +1,58 @@
+name: Test Windows scripts
+
+on:
+  push:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/test-windows-scripts.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]   # Windows PowerShell 5.1 與 PowerShell 7
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: sync-project-skills.ps1
+        run: |
+          git config --bool core.symlinks
+          scripts\sync-project-skills.ps1
+          $expected = @(Get-ChildItem skills, external -Recurse -Filter SKILL.md | ForEach-Object { $_.Directory.Name } | Sort-Object -Unique).Count
+          $actual = @(Get-ChildItem .claude\skills).Count
+          if ($actual -ne $expected) { throw "預期 $expected 個連結，實際 $actual" }
+          if (-not (Test-Path .claude\skills\tdd\SKILL.md)) { throw "連結無法存取 SKILL.md" }
+          $status = git status --porcelain
+          if ($status) { $status; throw "sync 後 git 狀態應為乾淨" }
+
+      - name: install.ps1
+        run: |
+          $t = Join-Path $env:RUNNER_TEMP 'skills'
+          scripts\install.ps1 $t
+          if (-not (Test-Path (Join-Path $t 'tdd\SKILL.md'))) { throw "安裝失敗" }
+          if (-not (Test-Path (Join-Path $t 'my-example-skill\SKILL.md'))) { throw "安裝失敗" }
+
+      - name: remove-external.ps1 / add-external.ps1 -Tag
+        run: |
+          scripts\remove-external.ps1 mattpocock-skills
+          if (Test-Path external\mattpocock-skills\skills) { throw "移除失敗" }
+          if (Test-Path .claude\skills\tdd) { throw "連結未移除" }
+          scripts\add-external.ps1 -Tag https://github.com/mattpocock/skills mattpocock-skills
+          if ((git config -f .gitmodules submodule.external/mattpocock-skills.track) -ne 'tag') { throw "track 設定錯誤" }
+          git -C external/mattpocock-skills describe --tags --exact-match
+          if ($LASTEXITCODE -ne 0) { throw "未 checkout 到 tag" }
+          if (-not (Test-Path .claude\skills\tdd\SKILL.md)) { throw "連結未重建" }
+          git diff --cached --name-status
+
+      - name: update-external.ps1
+        run: |
+          scripts\update-external.ps1
+          if ($LASTEXITCODE -ne 0) { throw "update 失敗" }
