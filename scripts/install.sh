@@ -3,6 +3,7 @@
 # 用法: scripts/install.sh [目標目錄]   (預設: ~/.claude/skills)
 # 會掃描 skills/ 與 external/ 下所有含 SKILL.md 的資料夾，
 # 並清除目標目錄中指向本 repo、但已不再是 skill 的無效連結（不會動到其他來源的 skill）
+# 目標目錄中已存在的同名項目若不是指向本 repo（實體資料夾或其他 repo 的連結），會略過不覆蓋
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 root="$(pwd)"
@@ -20,6 +21,13 @@ while IFS= read -r skill_md; do
   if [[ -e "$link" && ! -L "$link" ]]; then
     echo "略過 $name：$link 已存在且不是 symlink"
     continue
+  fi
+  if [[ -L "$link" ]]; then
+    existing="$(readlink "$link")"
+    if [[ "$existing" != "$root/"* ]]; then
+      echo "略過 $name：$link 已連結到其他來源（$existing）"
+      continue
+    fi
   fi
   ln -sfn "$root/$dir" "$link"
   current+="$root/$dir"$'\n'

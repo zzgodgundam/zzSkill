@@ -168,6 +168,8 @@ scripts/install.sh <其他目錄>          # 例如專案內的 .claude/skills
 
 會掃描 `skills/` 與 `external/` 下所有含 `SKILL.md` 的資料夾，以 symlink 連結到目標目錄。因為是 symlink，之後 `git pull` 或更新 submodule 後內容會自動同步。
 
+目標目錄中若已有同名項目（實體資料夾，或指向其他 repo 的連結），install 會略過並顯示「略過 …」，不會覆蓋；只會新增、更新、清除指向本 repo 的連結，因此可以和其他 skill repo 安裝到同一個目錄。
+
 ## 外部 Skill 清單
 
 | 名稱 | 來源 | 說明 |
